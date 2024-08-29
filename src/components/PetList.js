@@ -4,35 +4,37 @@ import { useRouter } from 'next/router';
 const PetList = () => {
   const [pets, setPets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const petsPerPage = 3; // Adjust this number to change how many pets are shown per page
+  const [isLoading, setIsLoading] = useState(true);
+  const petsPerPage = 6;
   const router = useRouter();
 
   useEffect(() => {
     const fetchPets = async () => {
-      const res = await fetch('/api/pets');
-      const { data } = await res.json();
-      setPets(data);
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/pets');
+        const { data } = await res.json();
+        setPets(data);
+      } catch (error) {
+        console.error("Failed to fetch pets:", error);
+      }
+      setIsLoading(false);
     };
     fetchPets();
   }, []);
 
-  const handleEdit = (id) => router.push(`/edit/${id}`);
+  const handleEdit = (id) => router.push(`/${id}/edit`);
+  const handleView = (id) => router.push(`/pet/${id}`);
 
   const indexOfLastPet = currentPage * petsPerPage;
   const indexOfFirstPet = indexOfLastPet - petsPerPage;
   const currentPets = pets.slice(indexOfFirstPet, indexOfLastPet);
 
-  const handleNextPage = () => {
-    if (indexOfLastPet < pets.length) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div style={{
@@ -52,10 +54,7 @@ const PetList = () => {
         color: '#333'
       }}>Registered Pets</h2>
       {pets.length === 0 ? (
-        <p style={{
-          textAlign: 'center',
-          color: '#888'
-        }}>No pets registered yet.</p>
+        <p style={{ textAlign: 'center', color: '#888' }}>No pets registered yet.</p>
       ) : (
         <>
           <div style={{
@@ -64,54 +63,44 @@ const PetList = () => {
             gap: '20px'
           }}>
             {currentPets.map((pet) => (
-              <div
-                key={pet._id}
-                style={{
-                  backgroundColor: '#fff',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  transition: 'box-shadow 0.3s ease'
-                }}
-                onMouseOver={(e) => e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)'}
-                onMouseOut={(e) => e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)'}
-              >
+              <div key={pet._id} style={{
+                backgroundColor: '#fff',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                transition: 'box-shadow 0.3s ease'
+              }}>
                 <img 
                   src={pet.image_url || '/api/placeholder/300/200'} 
                   alt={pet.name} 
-                  style={{
-                    width: '100%',
-                    height: '200px',
-                    objectFit: 'cover'
-                  }}
+                  style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                 />
                 <div style={{ padding: '20px' }}>
-                  <h3 style={{
-                    fontSize: '1.5rem',
-                    fontWeight: '600',
-                    marginBottom: '10px'
-                  }}>{pet.name}</h3>
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '10px' }}>{pet.name}</h3>
                   <p style={{ color: '#555', marginBottom: '5px' }}>Owner: {pet.owner_name}</p>
                   <p style={{ color: '#555', marginBottom: '15px' }}>Species: {pet.species}</p>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'center'
-                  }}>
-                    <button
-                      onClick={() => handleEdit(pet._id)}
-                      style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#2ecc71',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '5px',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.3s ease'
-                      }}
-                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#27ae60'}
-                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2ecc71'}
-                    >
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <button onClick={() => handleEdit(pet._id)} style={{
+                      padding: '10px 20px',
+                      backgroundColor: '#3498db',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.3s ease'
+                    }}>
                       Edit
+                    </button>
+                    <button onClick={() => handleView(pet._id)} style={{
+                      padding: '10px 20px',
+                      backgroundColor: '#2ecc71',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '5px',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.3s ease'
+                    }}>
+                      View
                     </button>
                   </div>
                 </div>
@@ -124,36 +113,23 @@ const PetList = () => {
             marginTop: '20px',
             gap: '10px'
           }}>
-            <button
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: currentPage === 1 ? '#ccc' : '#3498db',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.3s ease'
-              }}
-            >
-              Previous
-            </button>
-            <button
-              onClick={handleNextPage}
-              disabled={indexOfLastPet >= pets.length}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: indexOfLastPet >= pets.length ? '#ccc' : '#3498db',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: indexOfLastPet >= pets.length ? 'not-allowed' : 'pointer',
-                transition: 'background-color 0.3s ease'
-              }}
-            >
-              Next
-            </button>
+            {Array.from({ length: Math.ceil(pets.length / petsPerPage) }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => paginate(index + 1)}
+                style={{
+                  padding: '10px 15px',
+                  backgroundColor: currentPage === index + 1 ? '#3498db' : '#ddd',
+                  color: currentPage === index + 1 ? '#fff' : '#333',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.3s ease'
+                }}
+              >
+                {index + 1}
+              </button>
+            ))}
           </div>
         </>
       )}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { mutate } from 'swr';
 
@@ -20,7 +20,11 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
     dislikes: petForm.dislikes,
   });
 
-  /* Método PUT para editar una entrada existente en la base de datos MongoDB. */
+  useEffect(() => {
+    // Update form when petForm changes (e.g., when editing an existing pet)
+    setForm(petForm);
+  }, [petForm]);
+
   const putData = async (form) => {
     const { id } = router.query;
 
@@ -39,15 +43,13 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
       }
 
       const { data } = await res.json();
-
-      mutate(`/api/pets/${id}`, data, false); // Actualiza los datos locales sin revalidación.
+      mutate(`/api/pets/${id}`, data, false);
       router.push('/');
     } catch (error) {
       setMessage('Failed to update pet');
     }
   };
 
-  /* Método POST para añadir una nueva entrada en la base de datos MongoDB. */
   const postData = async (form) => {
     try {
       const res = await fetch('/api/pets', {
@@ -63,8 +65,6 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
         throw new Error(await res.text());
       }
 
-      const { data } = await res.json();
-      mutate('/api/pets', data, false);
       router.push('/');
     } catch (error) {
       setMessage(`Failed to add pet: ${error.message}`);
@@ -96,7 +96,11 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
     const errs = formValidate();
     if (Object.keys(errs).length === 0) {
       setMessage('Saving...');
-      await postData(form);
+      if (forNewPet) {
+        await postData(form);
+      } else {
+        await putData(form);
+      }
     } else {
       setErrors(errs);
       setMessage('Please fill all required fields');
@@ -206,7 +210,7 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2980b9'}
           onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3498db'}
         >
-          Submit
+          {forNewPet ? 'Add Pet' : 'Update Pet'}
         </button>
       </form>
       <p style={{ color: message.includes('Failed') ? 'red' : 'green', fontSize: '1.2rem', marginTop: '20px' }}>{message}</p>
