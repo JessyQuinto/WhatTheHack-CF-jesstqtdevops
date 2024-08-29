@@ -60,21 +60,21 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
         body: JSON.stringify(form),
       })
 
-      // Throw error with status code in case Fetch API req failed
       if (!res.ok) {
-        throw new Error(res.status)
+        throw new Error(await res.text())
       }
 
+      const { data } = await res.json()
+      mutate('/api/pets', data, false)
       router.push('/')
     } catch (error) {
-      setMessage('Failed to add pet')
+      setMessage(`Failed to add pet: ${error.message}`)
     }
   }
 
   const handleChange = (e) => {
     const target = e.target
-    const value =
-      target.name === 'poddy_trained' ? target.checked : target.value
+    const value = target.name === 'poddy_trained' ? target.checked : target.value
     const name = target.name
 
     setForm({
@@ -83,7 +83,6 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
     })
   }
 
-  /* Makes sure pet info is filled for pet name, owner name, species, and image url*/
   const formValidate = () => {
     let err = {}
     if (!form.name) err.name = 'Name is required'
@@ -93,13 +92,15 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
     return err
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const errs = formValidate()
     if (Object.keys(errs).length === 0) {
-      forNewPet ? postData(form) : putData(form)
+      setMessage('Saving...')
+      await postData(form)
     } else {
-      setErrors({ errs })
+      setErrors(errs)
+      setMessage('Please fill all required fields')
     }
   }
 
