@@ -4,7 +4,6 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-
       # Checkout code
       - uses: actions/checkout@main
 
@@ -22,3 +21,7 @@ jobs:
           template: ${{ github.workspace }}/config/main.bicep
           parameters: 'namePrefix=${{ vars.AZURE_PREFIX }}'
           failOnStdErr: false
+
+      # Set MongoDB URI as an environment variable
+      - name: Set MongoDB URI
+        run: echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" >> $GITHUB_ENV
