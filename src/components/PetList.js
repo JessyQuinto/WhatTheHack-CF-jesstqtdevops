@@ -5,6 +5,7 @@ const PetList = () => {
   const [pets, setPets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedPet, setSelectedPet] = useState(null);
   const petsPerPage = 6;
   const router = useRouter();
 
@@ -24,7 +25,8 @@ const PetList = () => {
   }, []);
 
   const handleEdit = (id) => router.push(`/${id}/edit`);
-  const handleView = (id) => router.push(`/pet/${id}`);
+  const handleView = (pet) => setSelectedPet(pet);
+  const closeView = () => setSelectedPet(null);
 
   const indexOfLastPet = currentPage * petsPerPage;
   const indexOfFirstPet = indexOfLastPet - petsPerPage;
@@ -91,7 +93,7 @@ const PetList = () => {
                     }}>
                       Edit
                     </button>
-                    <button onClick={() => handleView(pet._id)} style={{
+                    <button onClick={() => handleView(pet)} style={{
                       padding: '10px 20px',
                       backgroundColor: '#2ecc71',
                       color: '#fff',
@@ -132,6 +134,57 @@ const PetList = () => {
             ))}
           </div>
         </>
+      )}
+      
+      {selectedPet && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            padding: '20px',
+            borderRadius: '8px',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '90%',
+            overflow: 'auto'
+          }}>
+            <h2 style={{ fontSize: '2rem', marginBottom: '20px' }}>{selectedPet.name}</h2>
+            <img 
+              src={selectedPet.image_url || '/api/placeholder/300/200'} 
+              alt={selectedPet.name} 
+              style={{ width: '100%', height: 'auto', marginBottom: '20px', borderRadius: '8px' }}
+            />
+            <p><strong>Owner:</strong> {selectedPet.owner_name}</p>
+            <p><strong>Species:</strong> {selectedPet.species}</p>
+            <p><strong>Age:</strong> {selectedPet.age}</p>
+            <p><strong>Potty Trained:</strong> {selectedPet.poddy_trained ? 'Yes' : 'No'}</p>
+            <p><strong>Diet:</strong> {selectedPet.diet}</p>
+            <p><strong>Likes:</strong> {selectedPet.likes.join(', ')}</p>
+            <p><strong>Dislikes:</strong> {selectedPet.dislikes.join(', ')}</p>
+            <button onClick={closeView} style={{
+              marginTop: '20px',
+              padding: '10px 20px',
+              backgroundColor: '#e74c3c',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              transition: 'background-color 0.3s ease'
+            }}>
+              Close
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
