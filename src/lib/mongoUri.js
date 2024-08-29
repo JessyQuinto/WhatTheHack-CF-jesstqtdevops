@@ -3,12 +3,9 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 const mongoURI = process.env.MONGODB_URI;
 
 if (!mongoURI) {
-  if (process.env.NODE_ENV === "development") {
-    // throw error for development
-    throw new Error(
-      "Please define the MONGODB_URI environment variable inside .env.local"
-    );
-  } 
+  throw new Error(
+    "Please define the MONGODB_URI environment variable"
+  );
 }
 
 async function getMongoUri() {
@@ -21,7 +18,7 @@ async function getMongoUri() {
     console.log(mongoMemoryServer.getUri())
     return mongoMemoryServer.getUri();
   } else {
-    // use environment variable for development
+    // use environment variable
     return mongoURI;
   }
 }
