@@ -2,58 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import fetch from 'isomorphic-unfetch';
 import Hours from '../components/Hours';
-
-// Mock del módulo @actions/core (simulación para evitar errores)
-const core = {
-  getInput: () => 'mock-token',
-  setFailed: console.error
-};
-
-// Mock del módulo @actions/github (simulación para evitar errores)
-const github = {
-  getOctokit: () => ({
-    rest: {
-      issues: {
-        create: async () => ({ data: { html_url: 'https://github.com/mock-issue' } }),
-        createComment: async () => {}
-      }
-    }
-  }),
-  context: {
-    payload: { pull_request: { title: 'Mock PR', body: 'Mock body', number: 1 } },
-    repo: { owner: 'mock-owner', repo: 'mock-repo' }
-  }
-};
-
-// Función asíncrona para manejar la lógica del PR
-async function run() {
-  try {
-    const token = core.getInput("repo-token", { required: true });
-    const octokit = github.getOctokit(token);
-    const { context } = github;
-
-    const pr = context.payload.pull_request;
-    console.log(pr.title);
-    
-    console.log("Creating issue for PR");
-    const issue = await octokit.rest.issues.create({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      title: pr.title,
-      body: pr.body,
-    });
-
-    console.log("Adding comment to PR");
-    await octokit.rest.issues.createComment({
-      owner: context.repo.owner,
-      repo: context.repo.repo,
-      issue_number: pr.number,
-      body: `Issue created: ${issue.data.html_url}`,
-    });
-  } catch (error) {
-    core.setFailed(error.message);
-  }
-}
+import PetList from '../components/PetList';
 
 export default function Home() {
   const [dogImage, setDogImage] = useState('');
@@ -61,7 +10,6 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    run();
     fetchNewDogImage();
   }, []);
 
@@ -82,24 +30,10 @@ export default function Home() {
       });
   };
 
-  const handleEdit = () => {
-    router.push(`/edit/${pet._id}`);
-  };
-
-  const handleView = () => {
-    router.push(`/pet/${pet._id}`);
-  };
-
-  const handleAdd = () => {
-    router.push({
-      pathname: '/new',
-      query: { image_url: dogImage },
-    });
-  };
-
-  const handleNewDog = () => {
-    fetchNewDogImage();
-  };
+  const handleEdit = () => router.push(`/edit/${pet._id}`);
+  const handleView = () => router.push(`/pet/${pet._id}`);
+  const handleAdd = () => router.push({ pathname: '/new', query: { image_url: dogImage } });
+  const handleNewDog = () => fetchNewDogImage();
 
   return (
     <div style={{
@@ -144,62 +78,74 @@ export default function Home() {
         )}
         
         {pet ? (
-          <div>
-            <h2>{pet.name}</h2>
-            <p>Owner: {pet.owner_name}</p>
-            <p>Species: {pet.species}</p>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+          <div style={{ textAlign: 'center' }}>
+            <h2 style={{ fontSize: '2rem', marginBottom: '10px' }}>{pet.name}</h2>
+            <p style={{ color: '#555', marginBottom: '5px' }}>Owner: {pet.owner_name}</p>
+            <p style={{ color: '#555', marginBottom: '15px' }}>Species: {pet.species}</p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
               <button onClick={handleEdit} style={{
                 padding: '10px 20px',
                 backgroundColor: '#3498db',
                 color: 'white',
                 border: 'none',
                 borderRadius: '5px',
-                cursor: 'pointer'
-              }}>Edit Pet</button>
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease'
+              }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2980b9'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3498db'}>
+                Edit Pet
+              </button>
               <button onClick={handleView} style={{
                 padding: '10px 20px',
                 backgroundColor: '#2ecc71',
                 color: 'white',
                 border: 'none',
                 borderRadius: '5px',
-                cursor: 'pointer'
-              }}>View Details</button>
+                cursor: 'pointer',
+                transition: 'background-color 0.3s ease'
+              }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#27ae60'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2ecc71'}>
+                View Details
+              </button>
             </div>
           </div>
         ) : (
-          <div>
-            <p>Esta mascota no se ha registrado.</p>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ color: '#888', fontSize: '1.2rem', marginBottom: '20px' }}>This dog is not registered yet.</p>
             <button onClick={handleAdd} style={{
               padding: '10px 20px',
-              backgroundColor: '#e74c3c',
+              backgroundColor: '#e67e22',
               color: 'white',
               border: 'none',
               borderRadius: '5px',
               cursor: 'pointer',
-              marginTop: '20px'
-            }}>Registrar nueva mascota</button>
+              transition: 'background-color 0.3s ease'
+            }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#d35400'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#e67e22'}>
+              Add Pet
+            </button>
           </div>
         )}
-        
+
         <button onClick={handleNewDog} style={{
           padding: '10px 20px',
-          backgroundColor: '#34495e',
+          backgroundColor: '#9b59b6',
           color: 'white',
           border: 'none',
           borderRadius: '5px',
           cursor: 'pointer',
-          marginTop: '20px'
-        }}>Mostrar Nueva mascota</button>
+          transition: 'background-color 0.3s ease'
+        }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#8e44ad'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#9b59b6'}>
+          New Dog
+        </button>
       </div>
-      
-      <div style={{
-        marginTop: '40px',
-        backgroundColor: 'white',
-        padding: '30px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
-      }}>
+
+      <div style={{ marginTop: '50px' }}>
+        <PetList />
+      </div>
+
+      <div style={{ marginTop: '50px' }}>
         <Hours />
       </div>
     </div>

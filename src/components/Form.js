@@ -1,12 +1,12 @@
-import { useState } from 'react'
-import { useRouter } from 'next/router'
-import { mutate } from 'swr'
+import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { mutate } from 'swr';
 
 const Form = ({ formId, petForm, forNewPet = true }) => {
-  const router = useRouter()
-  const contentType = 'application/json'
-  const [errors, setErrors] = useState({})
-  const [message, setMessage] = useState('')
+  const router = useRouter();
+  const contentType = 'application/json';
+  const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState('');
 
   const [form, setForm] = useState({
     name: petForm.name,
@@ -18,11 +18,11 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
     image_url: petForm.image_url,
     likes: petForm.likes,
     dislikes: petForm.dislikes,
-  })
+  });
 
-  /* The PUT method edits an existing entry in the mongodb database. */
+  /* Método PUT para editar una entrada existente en la base de datos MongoDB. */
   const putData = async (form) => {
-    const { id } = router.query
+    const { id } = router.query;
 
     try {
       const res = await fetch(`/api/pets/${id}`, {
@@ -32,23 +32,22 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           'Content-Type': contentType,
         },
         body: JSON.stringify(form),
-      })
+      });
 
-      // Throw error with status code in case Fetch API req failed
       if (!res.ok) {
-        throw new Error(res.status)
+        throw new Error(res.status);
       }
 
-      const { data } = await res.json()
+      const { data } = await res.json();
 
-      mutate(`/api/pets/${id}`, data, false) // Update the local data without a revalidation
-      router.push('/')
+      mutate(`/api/pets/${id}`, data, false); // Actualiza los datos locales sin revalidación.
+      router.push('/');
     } catch (error) {
-      setMessage('Failed to update pet')
+      setMessage('Failed to update pet');
     }
-  }
+  };
 
-  /* The POST method adds a new entry in the mongodb database. */
+  /* Método POST para añadir una nueva entrada en la base de datos MongoDB. */
   const postData = async (form) => {
     try {
       const res = await fetch('/api/pets', {
@@ -58,55 +57,55 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           'Content-Type': contentType,
         },
         body: JSON.stringify(form),
-      })
+      });
 
       if (!res.ok) {
-        throw new Error(await res.text())
+        throw new Error(await res.text());
       }
 
-      const { data } = await res.json()
-      mutate('/api/pets', data, false)
-      router.push('/')
+      const { data } = await res.json();
+      mutate('/api/pets', data, false);
+      router.push('/');
     } catch (error) {
-      setMessage(`Failed to add pet: ${error.message}`)
+      setMessage(`Failed to add pet: ${error.message}`);
     }
-  }
+  };
 
   const handleChange = (e) => {
-    const target = e.target
-    const value = target.name === 'poddy_trained' ? target.checked : target.value
-    const name = target.name
+    const target = e.target;
+    const value = target.name === 'poddy_trained' ? target.checked : target.value;
+    const name = target.name;
 
     setForm({
       ...form,
       [name]: value,
-    })
-  }
+    });
+  };
 
   const formValidate = () => {
-    let err = {}
-    if (!form.name) err.name = 'Name is required'
-    if (!form.owner_name) err.owner_name = 'Owner is required'
-    if (!form.species) err.species = 'Species is required'
-    if (!form.image_url) err.image_url = 'Image URL is required'
-    return err
-  }
+    let err = {};
+    if (!form.name) err.name = 'Name is required';
+    if (!form.owner_name) err.owner_name = 'Owner is required';
+    if (!form.species) err.species = 'Species is required';
+    if (!form.image_url) err.image_url = 'Image URL is required';
+    return err;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    const errs = formValidate()
+    e.preventDefault();
+    const errs = formValidate();
     if (Object.keys(errs).length === 0) {
-      setMessage('Saving...')
-      await postData(form)
+      setMessage('Saving...');
+      await postData(form);
     } else {
-      setErrors(errs)
-      setMessage('Please fill all required fields')
+      setErrors(errs);
+      setMessage('Please fill all required fields');
     }
-  }
+  };
 
   return (
     <>
-      <form id={formId} onSubmit={handleSubmit}>
+      <form id={formId} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <label htmlFor="name">Name</label>
         <input
           type="text"
@@ -115,6 +114,7 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           value={form.name}
           onChange={handleChange}
           required
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
 
         <label htmlFor="owner_name">Owner</label>
@@ -125,6 +125,7 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           value={form.owner_name}
           onChange={handleChange}
           required
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
 
         <label htmlFor="species">Species</label>
@@ -135,6 +136,7 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           value={form.species}
           onChange={handleChange}
           required
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
 
         <label htmlFor="age">Age</label>
@@ -143,6 +145,7 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           name="age"
           value={form.age}
           onChange={handleChange}
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
 
         <label htmlFor="poddy_trained">Potty Trained</label>
@@ -151,6 +154,7 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           name="poddy_trained"
           checked={form.poddy_trained}
           onChange={handleChange}
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
 
         <label htmlFor="diet">Diet</label>
@@ -159,6 +163,7 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           maxLength="60"
           value={form.diet}
           onChange={handleChange}
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
 
         <label htmlFor="image_url">Image URL</label>
@@ -168,6 +173,7 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           value={form.image_url}
           onChange={handleChange}
           required
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
 
         <label htmlFor="likes">Likes</label>
@@ -176,6 +182,7 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           maxLength="60"
           value={form.likes}
           onChange={handleChange}
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
 
         <label htmlFor="dislikes">Dislikes</label>
@@ -184,20 +191,32 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           maxLength="60"
           value={form.dislikes}
           onChange={handleChange}
+          style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
 
-        <button type="submit" className="btn">
+        <button type="submit" className="btn" style={{
+          padding: '10px 20px',
+          backgroundColor: '#3498db',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          transition: 'background-color 0.3s ease'
+        }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2980b9'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3498db'}
+        >
           Submit
         </button>
       </form>
-      <p>{message}</p>
+      <p style={{ color: message.includes('Failed') ? 'red' : 'green', fontSize: '1.2rem', marginTop: '20px' }}>{message}</p>
       <div>
         {Object.keys(errors).map((err, index) => (
-          <li key={index}>{err}</li>
+          <li key={index} style={{ color: 'red' }}>{err}</li>
         ))}
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Form
+export default Form;
