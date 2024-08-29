@@ -52,7 +52,7 @@ export default function Home() {
         fontSize: '2.5em',
         textTransform: 'uppercase',
         letterSpacing: '2px'
-      }}>Reto WhatTheHack-CF-JESSY</h1>
+      }}>Reto WhatTheHack-CF-JESSY QUINTO TORRES</h1>
       
       <div style={{
         display: 'flex',
