@@ -111,7 +111,7 @@ export default function Home() {
           </div>
         ) : (
           <div style={{ textAlign: 'center' }}>
-            <p style={{ color: '#888', fontSize: '1.2rem', marginBottom: '20px' }}>This dog is not registered yet.</p>
+            <p style={{ color: '#888', fontSize: '1.2rem', marginBottom: '20px' }}>Esta mascota no se encuentra registrada.</p>
             <button onClick={handleAdd} style={{
               padding: '10px 20px',
               backgroundColor: '#e67e22',
@@ -122,7 +122,7 @@ export default function Home() {
               transition: 'background-color 0.3s ease'
             }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#d35400'}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#e67e22'}>
-              Add Pet
+              Registrar mascota
             </button>
           </div>
         )}
@@ -137,7 +137,7 @@ export default function Home() {
           transition: 'background-color 0.3s ease'
         }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#8e44ad'}
           onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#9b59b6'}>
-          New Dog
+          Siguiente
         </button>
       </div>
 

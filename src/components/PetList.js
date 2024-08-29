@@ -91,7 +91,7 @@ const PetList = () => {
                       cursor: 'pointer',
                       transition: 'background-color 0.3s ease'
                     }}>
-                      Edit
+                      Editar
                     </button>
                     <button onClick={() => handleView(pet)} style={{
                       padding: '10px 20px',
@@ -102,7 +102,7 @@ const PetList = () => {
                       cursor: 'pointer',
                       transition: 'background-color 0.3s ease'
                     }}>
-                      View
+                      Visualizar
                     </button>
                   </div>
                 </div>
@@ -181,7 +181,7 @@ const PetList = () => {
               cursor: 'pointer',
               transition: 'background-color 0.3s ease'
             }}>
-              Close
+              Cerrar
             </button>
           </div>
         </div>
